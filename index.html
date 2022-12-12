@@ -27,6 +27,18 @@
                         </li>
                     </ul>
                 </div>
+                <div class="overlay hidden">
+                    <div class="dialogue-box">
+                        <span class="dialogue-message">
+                            Are you you sure you want to delete Commute?
+                        </span>
+                        <div class="dialogue-buttons">
+                            <button id="dialogue-btn-no">No</button>
+                            <button id="dialogue-btn-yes">Yes</button>
+                        </div>
+                     </div>
+                </div>
+               
                 <div class="header__info-bar">
                     <div class="info-bar__nav-btn">
                         <div class="bar1"></div>
@@ -34,7 +46,6 @@
                         <div class="bar3"></div>
                     </div>
                     <div class="info-bar__greeting">
-                        
                     </div>
                     <div class="info-bar__allocated">
                         
@@ -106,7 +117,7 @@
                         <span class="label-text">
                         Envelope Name
                         </span>
-                        <input required id="form-envelope-name" type="text" name="name" maxlength="25">
+                        <input required id="form-envelope-name" type="text" name="name" maxlength="25" autofocus>
                         <div class="error name-error"></div>
                     </label>
                     <label for="allocation" class="fancy-input">
@@ -150,7 +161,12 @@
                             </label>
                         </div>
 
-                    <button class="action-btn" type="submit">Add</button>
+                    <div class="button-container">
+                        <button class="action-btn delete-btn hidden" type="button">Delete</button>
+                        <button class="action-btn save-btn hidden" type="button">Save</button>
+                        <button class="action-btn add-btn" type="submit">Add</button>
+                    </div>
+                    
                 </form> 
             </div>
         </main>

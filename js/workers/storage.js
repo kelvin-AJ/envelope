@@ -6,9 +6,11 @@ export default class Storage{
         this.localBasket = new LocalStorage("basket");
         this.localBalance = new LocalStorage("balance");
         this.plannedFunds = 0;
+        this.miscelleneousBalance = 0;
 
-        this.preferences = this.localPreferences.getSaved() || {
-            firstName : "Kelvin",
+        // this.localPreferences.getSaved() || 
+        this.preferences ={
+            firstName : "Emmanuel",
             darkMode : false,
             currency : currency
         };
@@ -22,6 +24,7 @@ export default class Storage{
         this._updateLocalPreferences();
         
         this.updatePlannedFunds();
+        this.updateMiscelleneousBalance();
     }
 
     getBalance(){
@@ -33,6 +36,12 @@ export default class Storage{
         this._updateLocalBalance();
     }
 
+    updateBalance(){
+        this.updatePlannedFunds();
+        this.setBalance(this.miscelleneousBalance + this.plannedFunds);
+        this.updateMiscelleneousBalance();
+    }
+
     getCurrency(){
         return this.preferences.currency;
     }
@@ -42,7 +51,12 @@ export default class Storage{
     }
     // ENVELOPEs AND BASKET
     getMiscelleousBalance(){
-        return this.getBalance() - this.plannedFunds;
+        return this.miscelleneousBalance;
+    }
+
+    updateMiscelleneousBalance(){
+        this.updatePlannedFunds()
+        this.miscelleneousBalance = this.balanceTotal - this.plannedFunds;
     }
 
     updatePlannedFunds(){
@@ -60,12 +74,14 @@ export default class Storage{
         this.basket.push(envelope);
         this._updateLocalBasket();
         this.updatePlannedFunds();
+        this.updateMiscelleneousBalance()
     }
 
     deleteEnvelope(key){
         this.basket.splice(this._getEnvelopeIndex(key), 1);
-        this._updateLocalBasket();
+        this.updateMiscelleneousBalance();
 
+        this._updateLocalBasket();
         return this.basket;
     }
 
