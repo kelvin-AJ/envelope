@@ -90,6 +90,8 @@ export default class Interface{
 
             this.setupForm.elements.firstname.removeAttribute("required");
             this.setupForm.elements.currency.removeAttribute("required");
+
+            this._toggleSideBar();
         }
 
         if(preferences){
@@ -99,7 +101,11 @@ export default class Interface{
             this.currencyInput.classList?.remove("hidden");
             this.mainAllocation.classList.add("hidden");
             this.setupForm.elements.allocation.removeAttribute("required");
+
+            this._toggleSideBar();
         }
+
+       
     }
 
     allowClickableOverlay(callbackOne) {
@@ -122,10 +128,13 @@ export default class Interface{
         this.setupForm.elements.currency.value = "";
     }
 
-    handleSetupForm(callback) {
-        this.allowClickableOverlay(() => {
-            this.setupForm.removeEventListener("submit", completeCallback)
-        })
+    handleSetupForm(callback, newSetup=false) {
+        if(!newSetup) {
+            this.allowClickableOverlay(() => {
+                this.setupForm.removeEventListener("submit", completeCallback)
+            })
+        }
+        
 
         function completeCallback(e) {
             e.preventDefault()

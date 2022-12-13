@@ -3,6 +3,8 @@ import Interface from "./workers/interface.js";
 import Envelope from "./workers/envelope.js";
 import EnvelopeWorker from "./workers/envelopeWorker.js";
 import CurrencyStatus from "./workers/currencyStatus.js";
+
+
 class App {
     currency = {
         USD : ["USD", "$"],
@@ -10,6 +12,7 @@ class App {
         EUR : ["EUR", "€"],
         GBP : ["GBP", "₤"]
     }
+
     constructor(){
         this.storage = new Storage(this.currency.GBP);
         this.interface = new Interface();
@@ -29,9 +32,9 @@ class App {
         this._renderAllEnvelopes();
         this._allowFormHandling();
         this._handleEnvelopeInteraction();
-        this.handleMessage();
 
     }
+
     _initialize() {
         if(!this.storage.initialized){
             this.interface.showSetupForm(true)
@@ -49,8 +52,11 @@ class App {
                 this.storage.initialize();
                 this._renderGreetingAndBalance();
                 this._renderMiscelleneous();
-            })
+            }, true)
         }
+
+        
+        // this.handleMessage();
         this.interface.updateCurrency(this.storage.getCurrency()[1]);
     }
 
@@ -64,11 +70,15 @@ class App {
                 if(allocation < this.storage.getPlannedFunds()) {
                     this.interface.showDialogueMessage("Funding your wallet with any amount less than your planned funds would delete all envelopes. Are you sure you want to proceed? " ,
                     () => {
+
+                        
                         this.storage.setBalance(allocation);
                         this.storage.deleteAllEnvelopes();
                         this.interface.deleteAllEnvelopes();
                         this._renderGreetingAndBalance();
+                        
                         this._renderMiscelleneous();
+
                     })
                 }else {
                     this.interface.showDialogueMessage("Are you sure you want to proceed? " ,
@@ -77,8 +87,11 @@ class App {
                         this.interface.deleteAllEnvelopes();
                         this._renderGreetingAndBalance();
                         this._renderMiscelleneous();
+
+                        this.storage.getBasket().forEach(envlope => this.interface.renderEnvelope(this.storage.getCurrency()[1], envlope))
                     })
                 }
+                
 
             })
         })
@@ -101,7 +114,8 @@ class App {
                     this.interface.deleteAllEnvelopes();
                     this.interface.currency = this.storage.getCurrency();
                     this._renderMiscelleneous();
-                    this._renderAllEnvelopes();
+
+                    this.storage.getBasket().forEach(envlope => this.interface.renderEnvelope(this.storage.getCurrency()[1], envlope))
                 })
             })
 
@@ -277,10 +291,16 @@ class App {
     }
 
     handleMessage() {
-        const currencyMessage = this.currencyStatus.getCurrencyStatus(this.storage.getCurrency()[0]).then(message => {
+        
+        this.currencyStatus.getCurrencyStatus(this.storage.getCurrency()[0]).then(message => {
             setTimeout(
                 this.interface.renderGreeting(message)
-            ,3000)
+            ,3000);
+
+
+            setTimeout(
+                this._renderGreetingAndBalance()
+            , 30000)
             
         })
     }
