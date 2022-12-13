@@ -2,15 +2,16 @@ import LocalStorage from "./ls.js";
 
 export default class Storage{
     constructor(currency){
+        this.LocalInit = new LocalStorage("init")
         this.localPreferences = new LocalStorage("preferences");
         this.localBasket = new LocalStorage("basket");
         this.localBalance = new LocalStorage("balance");
         this.plannedFunds = 0;
         this.miscelleneousBalance = 0;
-
-        // this.localPreferences.getSaved() || 
-        this.preferences ={
-            firstName : "Emmanuel",
+        this.initialized = this.LocalInit.getSaved() || false;
+        
+        this.preferences = this.localPreferences.getSaved() || {
+            firstName : "",
             darkMode : false,
             currency : currency
         };
@@ -27,13 +28,21 @@ export default class Storage{
         this.updateMiscelleneousBalance();
     }
 
-    getBalance(){
-        return this.balanceTotal;
+    initialize() {
+        this.initialized = true;
+        this.LocalInit.updateStorage("true");
     }
+
 
     setBalance(balance){
         this.balanceTotal = balance;
         this._updateLocalBalance();
+        this.updateMiscelleneousBalance();
+    }
+
+    setFirstName(firstName){
+        this.preferences.firstName = firstName;
+        this._updateLocalPreferences();
     }
 
     updateBalance(){
@@ -84,6 +93,14 @@ export default class Storage{
         this._updateLocalBasket();
         return this.basket;
     }
+    deleteAllEnvelopes() {
+        this.basket = [];
+        this._updateLocalBasket();
+
+
+        this.updatePlannedFunds();
+        this.updateMiscelleneousBalance();
+    }
 
     updateEnvelope(envelope){
         const envelopeIndex = this._getEnvelopeIndex(envelope.key);
@@ -104,6 +121,15 @@ export default class Storage{
     getEnvelopeNames(){
         return this.basket.map(envelope => envelope.name);
     }
+
+    getBalance(){
+        return this.balanceTotal;
+    }
+
+    getPlannedFunds() {
+        return this.plannedFunds
+    }
+
 
     // USER PREFERENCES
     setDarkMode(boolean){

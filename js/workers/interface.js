@@ -19,17 +19,39 @@ export default class Interface{
     }
 
     constructor(){
+        this.interfaceCurrency = "";
+
+        // Booleans
         this.formIsOpen = false;
         this.formEditing = false;
 
+        // SETUP FORM
+        this.setupForm = document.querySelector("#setup-form");
+        this.setupDiv = document.querySelector(".allocation-form")
+        this.username = document.querySelector("#firstname");
+        this.currencyInput = document.querySelector("#currency");
+        this.mainAllocation = document.querySelector("#main-allocation");
+        this.cancelBtn = document.querySelector("#setup-cancel-btn")
+
+        // OVERLAY AND DIALOGUE
         this.overlay = document.querySelector(".overlay");
+        this.dialogBox = document.querySelector(".dialogue-box");
         this.dialogMessage = document.querySelector(".dialogue-message");
         this.dialogYes = document.querySelector("#dialogue-btn-yes");
         this.dialogNo = document.querySelector("#dialogue-btn-no");
+
+        // SIDEBAR AND NAVIGATION
+        this.fundWalletBtn = document.querySelector("#addFund-btn");
+        this.preferencesBtn = document.querySelector("#preference-btn")
+
         this.sideBarElement = document.querySelector(".header__side-bar");
         this.infoGreetingElement = document.querySelector(".info-bar__greeting");
         this.navBtnElement = document.querySelector(".info-bar__nav-btn");
         this.infoAlloctedElement = document.querySelector(".info-bar__allocated");
+
+        // BASKET, ENVELOPES AND ENVELOPE CREATION
+        this.currencyIcons = [...document.querySelectorAll(".currency-icon")];
+
         this.basketElement = document.querySelector(".basket");
         this.formAreaElement = document.querySelector(".form-area");
         this.formMain = document.querySelector(".evelope-creation-form");
@@ -39,7 +61,6 @@ export default class Interface{
         this.envelopeNameEl = this.formMain.querySelector(`input[name="name"]`);
         this.decrementEl = this.formMain.querySelector(`input[name="decrement"]`);
         this.incrementEl = this.formMain.querySelector(`input[name="increment"]`);
-        this.formDeleteBtn = this.formMain.querySelector(".delete-btn");
         this.formSaveBtn = this.formMain.querySelector(".save-btn");
         this.formAddBtn = this.formMain.querySelector(".add-btn");
         this.format = new Intl.NumberFormat(navigator.language);
@@ -49,8 +70,73 @@ export default class Interface{
         this.addDefaultListeners();
     }
 
-    getFormData(){
-        const formData = {
+    showSetupForm(newSetup=false,preferences=false, setupInfo) {
+        this.overlay.classList.remove("hidden");
+        this.setupDiv.classList.remove("hidden");
+
+        if(newSetup) {
+            this.username.classList?.remove("hidden");
+            this.currencyInput.classList?.remove("hidden");
+
+            
+            this.setupForm.elements.firstname.setAttribute("required", "true");
+            this.setupForm.elements.currency.setAttribute("required", "true");
+
+        }else {
+            this.username.classList.add("hidden");
+            this.currencyInput.classList.add("hidden");
+            this.mainAllocation.classList.remove("hidden");
+            
+
+            this.setupForm.elements.firstname.removeAttribute("required");
+            this.setupForm.elements.currency.removeAttribute("required");
+        }
+
+        if(preferences){
+            this.setupForm.elements.firstname.value = setupInfo.firstName;
+            this.setupForm.elements.currency.value = setupInfo.currency[0];
+
+            this.currencyInput.classList?.remove("hidden");
+            this.mainAllocation.classList.add("hidden");
+            this.setupForm.elements.allocation.removeAttribute("required");
+        }
+    }
+
+    allowClickableOverlay(callbackOne) {
+        const self = this;
+
+        function callback(e) {
+            callbackOne();
+            self.hideSetupForm();
+            self.cancelBtn.removeEventListener("click", callback)
+        }
+
+        this.cancelBtn.addEventListener("click", callback)
+    }
+
+    hideSetupForm() {
+        this.overlay.classList.add("hidden");
+        this.setupDiv.classList.add("hidden");
+
+        this.setupForm.elements.firstname.value = "";
+        this.setupForm.elements.currency.value = "";
+    }
+
+    handleSetupForm(callback) {
+        this.allowClickableOverlay(() => {
+            this.setupForm.removeEventListener("submit", completeCallback)
+        })
+
+        function completeCallback(e) {
+            e.preventDefault()
+            callback()
+        }
+
+        this.setupForm.addEventListener("submit", completeCallback)
+    }
+
+    getFormData(setup=false){
+        let formData = {
             icon : this.formMain.elements.icon.value,
             name : this.formMain.elements.name.value,
             allocation : this.formMain.elements.allocation.value,
@@ -59,7 +145,23 @@ export default class Interface{
             color : this.formMain.elements.color.value
         }
 
+        if(setup) {
+            formData = {
+                firstName : this.setupForm.elements.firstname.value,
+                currency : this.setupForm.elements.currency.value,
+                allocation : this.setupForm.elements.allocation.value
+            }
+        }
+
         return formData;
+    }
+
+    updateCurrency(currency) {
+        this.interfaceCurrency = currency;
+
+        this.currencyIcons.forEach(icon => {
+            icon.textContent = currency;
+        })
     }
 
     validateForm(parameters={miscFund:500}){
@@ -117,22 +219,38 @@ export default class Interface{
     }
 
     showDialogueMessage(message, callback, callBackOnclose=null) {
-        this.overlay.classList.remove("hidden");
-        this.dialogMessage.innerHTML = message;
+        self = this;
+
+        self.setupDiv.classList.add("hidden")
+        self.overlay.classList.remove("hidden");
+        self.dialogBox.classList.remove("hidden");
+        self.dialogMessage.innerHTML = message;
         
         const completeCallBack = function () {
             callback();
-            this.overlay.classList.add("hidden");
+            self.overlay.classList.add("hidden");
+            self.dialogBox.classList.add("hidden");
+
+
+            self.dialogYes.removeEventListener("click", completeCallBack)
+            self.dialogNo.removeEventListener("click", completeNocallBack)
         }
 
-        this.dialogYes.addEventListener("click", completeCallBack.bind(this))
+        const completeNocallBack = function () {
+            self.overlay.classList.add("hidden")
+            self.dialogBox.classList.add("hidden");
 
 
-        this.dialogNo.addEventListener("click", () => {
-            this.overlay.classList.add("hidden")
-            this.dialogYes.removeEventListener("click", completeCallBack)
+            self.dialogYes.removeEventListener("click", completeCallBack)
+            self.dialogNo.removeEventListener("click", completeNocallBack)
+
+
             callBackOnclose ? callBackOnclose() : true
-        })
+        }
+
+        self.dialogYes.addEventListener("click", completeCallBack)
+        self.dialogNo.addEventListener("click", completeNocallBack)
+
 
     }
     showForm(event, edit=false, envelope=null){
@@ -156,13 +274,11 @@ export default class Interface{
 
         if(edit){
             this.formAddBtn.classList.add("hidden");
-            this.formDeleteBtn.classList.remove("hidden");
             this.formSaveBtn.classList.remove("hidden");
             // FORM EDIT VALIDATION
         }else{
             
             this.formAddBtn.classList.remove("hidden");
-            this.formDeleteBtn.classList.add("hidden");
             this.formSaveBtn.classList.add("hidden");
         }
     }
@@ -266,9 +382,7 @@ export default class Interface{
 
     reRenderEnvelope(envelope, currency) {
         const key = envelope.key;
-        console.log(key)
         const envelopeEl = this.basketElement.querySelector(`div[data-key='${key}']`)
-        console.log(envelopeEl)
 
         envelopeEl.className = ""
         envelopeEl.classList.add("basket-envelope");
@@ -304,11 +418,11 @@ export default class Interface{
     }
 
     deleteEnvelope(key) {
-        console.log(key)
         const DOMEnvelope = this.basketElement.querySelector(`div[data-key='${key}']`);
-
-        
-        
         DOMEnvelope.remove();
+    }
+
+    deleteAllEnvelopes() {
+        this.basketElement.innerHTML = "";
     }
 }

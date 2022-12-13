@@ -32,6 +32,17 @@
 .btn:active{
     background-color: #d0ddd82a;
 }
+.button-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    align-items: center;
+}
+.button-container #setup-cancel-btn{
+    color: #fc3052;
+    align-self: center;
+}
+
 #normal-flow{
     position: fixed;
     width: 100%;
@@ -48,13 +59,41 @@
     justify-items: center;
     z-index: 2;
 }
-.dialogue-box{
+
+.dialogue-box, .allocation-form{
+    border-top: 2px solid var(--ultra-red);
     background-color: var(--white);
     color: var(--xanadu);
-    height: 5rem;
+    /* height: 5rem; */
     padding: 2rem;
     display: grid;
     justify-items: center;
+}
+
+.allocation-form form {
+    display: grid;
+}
+
+.allocation-form input, .allocation-form select{
+    background-color: var(--bright-xanadu);
+    display: block;
+    margin: 0.4rem  auto 1rem auto ;
+    height: 2rem;
+    /* min-width: 15rem; */
+    width: 90%;
+    border-radius: 0.2rem;
+}
+
+.allocation-form input:focus {
+    outline: none;
+}
+
+.allocation-form button{
+    justify-self: center;
+    height: 2.5rem;
+    width: 4.5rem;
+    border-radius: 0.2rem;
+    color: #4ed49c;
 }
 
 .dialogue-box button{
@@ -391,7 +430,7 @@ form #form-drag-bar{
 }
 
 .hidden, form.hidden, div.hidden {
-    display: none;
+    display: none !important;
 }
 .transparent, form.transparent, div.transparent {
     opacity: 0;
